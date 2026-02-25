@@ -4,6 +4,7 @@ const entryDropdown = document.getElementById("entry-dropdown");
 const addEntryButton = document.getElementById("add-entry");
 const clearButton = document.getElementById("clear");
 const output = document.getElementById("output");
+const outputText = document.querySelector(".output-text");
 
 let isError = false;
 
@@ -47,7 +48,7 @@ function addEntry() {
 
   targetInputContainer.insertAdjacentHTML("beforeend", HTMLString);
 
-  // ⭐ focus automático PRO
+
   const inputs = targetInputContainer.querySelectorAll("input");
   inputs[inputs.length - 1].focus();
 }
@@ -94,15 +95,26 @@ function calculateCalories(e) {
 
   const surplusOrDeficit = remainingCalories < 0 ? "Surplus" : "Deficit";
 
-  output.innerHTML = `
-    <span class="${surplusOrDeficit.toLowerCase()}">
-      ${Math.abs(remainingCalories)} Calorie ${surplusOrDeficit}
-    </span>
-    <hr>
-    <p>${budgetCalories} Calories Budgeted</p>
-    <p>${consumedCalories} Calories Consumed</p>
-    <p>${exerciseCalories} Calories Burned</p>
-  `;
+  const progress = document.querySelector(".progress");
+
+const percentage = (consumedCalories / budgetCalories) * 100;
+progress.style.width = `${Math.min(percentage, 100)}%`;
+
+if (percentage > 100) {
+  progress.style.background = "var(--dark-red)";
+} else {
+  progress.style.background = "var(--light-green)";
+}
+
+outputText.innerHTML = `
+  <span class="${surplusOrDeficit.toLowerCase()}">
+    ${Math.abs(remainingCalories)} Calorie ${surplusOrDeficit}
+  </span>
+  <hr>
+  <p>${budgetCalories} Calories Budgeted</p>
+  <p>${consumedCalories} Calories Consumed</p>
+  <p>${exerciseCalories} Calories Burned</p>
+`;
 
   output.classList.remove("hide");
 }
@@ -115,10 +127,12 @@ function getCaloriesFromInputs(list) {
     const invalidInputMatch = isInvalidInput(currVal);
 
     if (invalidInputMatch) {
+      item.style.border = "2px solid red";  
       alert(`Invalid Input: ${invalidInputMatch[0]}`);
       isError = true;
       return 0;
     }
+    item.style.border = "1px solid #ccc";
 
     calories += Number(currVal);
   }
@@ -136,10 +150,21 @@ function clearForm() {
   }
 
   budgetNumberInput.value = "";
-  output.innerText = "";
+  outputText.innerHTML = "";
   output.classList.add("hide");
 }
 
 addEntryButton.addEventListener("click", addEntry);
 calorieCounter.addEventListener("submit", calculateCalories);
 clearButton.addEventListener("click", clearForm);
+
+const themeToggle = document.getElementById("theme-toggle");
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("light-mode");
+
+  themeToggle.textContent =
+    document.body.classList.contains("light-mode")
+      ? "🌙 Dark Mode"
+      : "☀️ Light Mode";
+});
