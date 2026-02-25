@@ -1,4 +1,4 @@
-# Calorie Counter Web App
+# 🥗 Calorie Counter App
 
 Interactive web application to calculate daily calories with dynamic form validation.
 
