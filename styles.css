@@ -21,6 +21,11 @@ h1 {
   text-align: center;
 }
 
+#theme-toggle {
+  display: block;
+  margin: 10px auto 0;
+}
+
 .container {
   width: 90%;
   max-width: 680px;
@@ -92,7 +97,24 @@ select {
   color: var(--light-green);
 }
 
-/* 📱 RESPONSIVE PRO */
+/* progress bar */
+.progress-bar {
+  width: 100%;
+  background: #ddd;
+  height: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  width: 0%;
+  background: var(--light-green);
+  transition: width 0.4s ease;
+}
+
+/* responsive */
 @media (max-width: 600px) {
   body {
     font-size: 16px;
@@ -113,6 +135,7 @@ select {
   }
 }
 
+/* light mode */
 body.light-mode {
   background-color: #ffffff;
   color: #111;
@@ -124,25 +147,4 @@ body.light-mode fieldset {
 
 body.light-mode .output {
   border-color: #111;
-}
-
-.progress-bar {
-  width: 100%;
-  background: #ddd;
-  height: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  overflow: hidden;
-}
-
-.progress {
-  height: 100%;
-  width: 0%;
-  background: var(--light-green);
-  transition: width 0.4s ease;
-}
-
-#theme-toggle {
-  display: block;
-  margin: 10px auto 0;
 }

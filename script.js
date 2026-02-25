@@ -9,13 +9,11 @@ const outputText = document.querySelector(".output-text");
 let isError = false;
 
 function cleanInputString(str) {
-  const regex = /[+-\s]/g;
-  return str.replace(regex, "");
+  return str.replace(/[+\-\s]/g, "");
 }
 
 function isInvalidInput(str) {
-  const regex = /\d+e\d+/i;
-  return str.match(regex);
+  return /\d+e\d+/i.test(str);
 }
 
 function addEntry() {
@@ -27,27 +25,13 @@ function addEntry() {
     targetInputContainer.querySelectorAll('input[type="text"]').length + 1;
 
   const HTMLString = `
-    <label for="${entryDropdown.value}-${entryNumber}-name">
-      Entry ${entryNumber} Name
-    </label>
-    <input
-      type="text"
-      id="${entryDropdown.value}-${entryNumber}-name"
-      placeholder="Name"
-    />
-    <label for="${entryDropdown.value}-${entryNumber}-calories">
-      Entry ${entryNumber} Calories
-    </label>
-    <input
-      type="number"
-      min="0"
-      id="${entryDropdown.value}-${entryNumber}-calories"
-      placeholder="Calories"
-    />
+    <label>Entry ${entryNumber} Name</label>
+    <input type="text" placeholder="Name" />
+    <label>Entry ${entryNumber} Calories</label>
+    <input type="number" min="0" placeholder="Calories" />
   `;
 
   targetInputContainer.insertAdjacentHTML("beforeend", HTMLString);
-
 
   const inputs = targetInputContainer.querySelectorAll("input");
   inputs[inputs.length - 1].focus();
@@ -62,27 +46,13 @@ function calculateCalories(e) {
     return;
   }
 
-  const breakfastNumberInputs = document.querySelectorAll(
-    "#breakfast input[type='number']"
-  );
-  const lunchNumberInputs = document.querySelectorAll(
-    "#lunch input[type='number']"
-  );
-  const dinnerNumberInputs = document.querySelectorAll(
-    "#dinner input[type='number']"
-  );
-  const snacksNumberInputs = document.querySelectorAll(
-    "#snacks input[type='number']"
-  );
-  const exerciseNumberInputs = document.querySelectorAll(
-    "#exercise input[type='number']"
-  );
+  const get = (sel) => document.querySelectorAll(sel);
 
-  const breakfastCalories = getCaloriesFromInputs(breakfastNumberInputs);
-  const lunchCalories = getCaloriesFromInputs(lunchNumberInputs);
-  const dinnerCalories = getCaloriesFromInputs(dinnerNumberInputs);
-  const snacksCalories = getCaloriesFromInputs(snacksNumberInputs);
-  const exerciseCalories = getCaloriesFromInputs(exerciseNumberInputs);
+  const breakfastCalories = getCaloriesFromInputs(get("#breakfast input[type='number']"));
+  const lunchCalories = getCaloriesFromInputs(get("#lunch input[type='number']"));
+  const dinnerCalories = getCaloriesFromInputs(get("#dinner input[type='number']"));
+  const snacksCalories = getCaloriesFromInputs(get("#snacks input[type='number']"));
+  const exerciseCalories = getCaloriesFromInputs(get("#exercise input[type='number']"));
   const budgetCalories = getCaloriesFromInputs([budgetNumberInput]);
 
   if (isError) return;
@@ -95,26 +65,22 @@ function calculateCalories(e) {
 
   const surplusOrDeficit = remainingCalories < 0 ? "Surplus" : "Deficit";
 
+  // progress bar
   const progress = document.querySelector(".progress");
+  const percentage = (consumedCalories / budgetCalories) * 100;
+  progress.style.width = `${Math.min(percentage, 100)}%`;
+  progress.style.background =
+    percentage > 100 ? "var(--dark-red)" : "var(--light-green)";
 
-const percentage = (consumedCalories / budgetCalories) * 100;
-progress.style.width = `${Math.min(percentage, 100)}%`;
-
-if (percentage > 100) {
-  progress.style.background = "var(--dark-red)";
-} else {
-  progress.style.background = "var(--light-green)";
-}
-
-outputText.innerHTML = `
-  <span class="${surplusOrDeficit.toLowerCase()}">
-    ${Math.abs(remainingCalories)} Calorie ${surplusOrDeficit}
-  </span>
-  <hr>
-  <p>${budgetCalories} Calories Budgeted</p>
-  <p>${consumedCalories} Calories Consumed</p>
-  <p>${exerciseCalories} Calories Burned</p>
-`;
+  outputText.innerHTML = `
+    <span class="${surplusOrDeficit.toLowerCase()}">
+      ${Math.abs(remainingCalories)} Calorie ${surplusOrDeficit}
+    </span>
+    <hr>
+    <p>${budgetCalories} Calories Budgeted</p>
+    <p>${consumedCalories} Calories Consumed</p>
+    <p>${exerciseCalories} Calories Burned</p>
+  `;
 
   output.classList.remove("hide");
 }
@@ -124,16 +90,15 @@ function getCaloriesFromInputs(list) {
 
   for (const item of list) {
     const currVal = cleanInputString(item.value);
-    const invalidInputMatch = isInvalidInput(currVal);
 
-    if (invalidInputMatch) {
-      item.style.border = "2px solid red";  
-      alert(`Invalid Input: ${invalidInputMatch[0]}`);
+    if (isInvalidInput(currVal)) {
+      item.style.border = "2px solid red";
+      alert("Invalid input");
       isError = true;
       return 0;
     }
-    item.style.border = "1px solid #ccc";
 
+    item.style.border = "1px solid #ccc";
     calories += Number(currVal);
   }
 
@@ -141,30 +106,32 @@ function getCaloriesFromInputs(list) {
 }
 
 function clearForm() {
-  const inputContainers = Array.from(
-    document.querySelectorAll(".input-container")
+  document.querySelectorAll(".input-container").forEach(
+    (c) => (c.innerHTML = "")
   );
-
-  for (const container of inputContainers) {
-    container.innerHTML = "";
-  }
-
   budgetNumberInput.value = "";
   outputText.innerHTML = "";
   output.classList.add("hide");
 }
 
+// events
 addEntryButton.addEventListener("click", addEntry);
 calorieCounter.addEventListener("submit", calculateCalories);
 clearButton.addEventListener("click", clearForm);
 
+// theme toggle PRO
 const themeToggle = document.getElementById("theme-toggle");
 
-themeToggle.addEventListener("click", () => {
-  document.body.classList.toggle("light-mode");
-
+function updateThemeButton() {
   themeToggle.textContent =
     document.body.classList.contains("light-mode")
       ? "🌙 Dark Mode"
       : "☀️ Light Mode";
+}
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("light-mode");
+  updateThemeButton();
 });
+
+updateThemeButton();
