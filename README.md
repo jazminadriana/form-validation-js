@@ -1,4 +1,4 @@
-# 🥗 Calorie Counter App
+# Calorie Counter App
 
 A dynamic web application that calculates daily calorie intake based on user inputs, featuring real-time validation, UI feedback, and responsive design.
 
