@@ -1,14 +1,15 @@
 const calorieCounter = document.getElementById("calorie-counter");
-const budgetNumberInput = document.getElementById("budget");
+const budgetInput = document.getElementById("budget");
 const entryDropdown = document.getElementById("entry-dropdown");
 const addEntryButton = document.getElementById("add-entry");
 const clearButton = document.getElementById("clear");
 const output = document.getElementById("output");
 const outputText = document.querySelector(".output-text");
+const themeToggle = document.getElementById("theme-toggle");
 
 let isError = false;
 
-function cleanInputString(str) {
+function cleanInput(str) {
   return str.replace(/[+\-\s]/g, "");
 }
 
@@ -17,121 +18,91 @@ function isInvalidInput(str) {
 }
 
 function addEntry() {
-  const targetInputContainer = document.querySelector(
-    `#${entryDropdown.value} .input-container`
-  );
+  const targetContainer = document.querySelector(`#${entryDropdown.value} .input-container`);
+  const entryNum = targetContainer.querySelectorAll('input[type="text"]').length + 1;
 
-  const entryNumber =
-    targetInputContainer.querySelectorAll('input[type="text"]').length + 1;
-
-  const HTMLString = `
-    <label>Entry ${entryNumber} Name</label>
+  const html = `
+    <label>Entry ${entryNum} Name</label>
     <input type="text" placeholder="Name" />
-    <label>Entry ${entryNumber} Calories</label>
+    <label>Entry ${entryNum} Calories</label>
     <input type="number" min="0" placeholder="Calories" />
   `;
 
-  targetInputContainer.insertAdjacentHTML("beforeend", HTMLString);
-
-  const inputs = targetInputContainer.querySelectorAll("input");
-  inputs[inputs.length - 1].focus();
+  targetContainer.insertAdjacentHTML("beforeend", html);
+  targetContainer.querySelector("input:last-of-type").focus();
 }
 
 function calculateCalories(e) {
   e.preventDefault();
   isError = false;
 
-  if (!budgetNumberInput.value) {
-    alert("Please enter a calorie budget.");
-    return;
-  }
+  if (!budgetInput.value) return alert("Please enter a calorie budget.");
 
-  const get = (sel) => document.querySelectorAll(sel);
+  const sections = ["breakfast","lunch","dinner","snacks","exercise"];
+  const calories = {};
 
-  const breakfastCalories = getCaloriesFromInputs(get("#breakfast input[type='number']"));
-  const lunchCalories = getCaloriesFromInputs(get("#lunch input[type='number']"));
-  const dinnerCalories = getCaloriesFromInputs(get("#dinner input[type='number']"));
-  const snacksCalories = getCaloriesFromInputs(get("#snacks input[type='number']"));
-  const exerciseCalories = getCaloriesFromInputs(get("#exercise input[type='number']"));
-  const budgetCalories = getCaloriesFromInputs([budgetNumberInput]);
+  sections.forEach(sec => {
+    const inputs = document.querySelectorAll(`#${sec} input[type="number"]`);
+    calories[sec] = getCalories(inputs);
+  });
 
   if (isError) return;
 
-  const consumedCalories =
-    breakfastCalories + lunchCalories + dinnerCalories + snacksCalories;
+  const consumed = calories.breakfast + calories.lunch + calories.dinner + calories.snacks;
+  const remaining = Number(budgetInput.value) - consumed + calories.exercise;
+  const status = remaining < 0 ? "Surplus" : "Deficit";
 
-  const remainingCalories =
-    budgetCalories - consumedCalories + exerciseCalories;
-
-  const surplusOrDeficit = remainingCalories < 0 ? "Surplus" : "Deficit";
-
-  // progress bar
-  const progress = document.querySelector(".progress");
-  const percentage = (consumedCalories / budgetCalories) * 100;
-  progress.style.width = `${Math.min(percentage, 100)}%`;
-  progress.style.background =
-    percentage > 100 ? "var(--dark-red)" : "var(--light-green)";
+  const progressEl = document.querySelector(".progress");
+  const percent = (consumed / Number(budgetInput.value)) * 100;
+  progressEl.style.width = `${Math.min(percent,100)}%`;
+  progressEl.style.background = percent > 100 ? "var(--danger)" : "var(--success)";
 
   outputText.innerHTML = `
-    <span class="${surplusOrDeficit.toLowerCase()}">
-      ${Math.abs(remainingCalories)} Calorie ${surplusOrDeficit}
-    </span>
+    <span class="${status.toLowerCase()}">${Math.abs(remaining)} Calorie ${status}</span>
     <hr>
-    <p>${budgetCalories} Calories Budgeted</p>
-    <p>${consumedCalories} Calories Consumed</p>
-    <p>${exerciseCalories} Calories Burned</p>
+    <p>${budgetInput.value} Calories Budgeted</p>
+    <p>${consumed} Calories Consumed</p>
+    <p>${calories.exercise} Calories Burned</p>
   `;
-
   output.classList.remove("hide");
 }
 
-function getCaloriesFromInputs(list) {
-  let calories = 0;
-
-  for (const item of list) {
-    const currVal = cleanInputString(item.value);
-
-    if (isInvalidInput(currVal)) {
+function getCalories(list) {
+  let total = 0;
+  list.forEach(item => {
+    const val = cleanInput(item.value);
+    if (isInvalidInput(val)) {
       item.style.border = "2px solid red";
-      alert("Invalid input");
+      alert("Invalid input detected");
       isError = true;
-      return 0;
+      return;
     }
-
     item.style.border = "1px solid #ccc";
-    calories += Number(currVal);
-  }
-
-  return calories;
+    total += Number(val) || 0;
+  });
+  return total;
 }
 
 function clearForm() {
-  document.querySelectorAll(".input-container").forEach(
-    (c) => (c.innerHTML = "")
-  );
-  budgetNumberInput.value = "";
+  document.querySelectorAll(".input-container").forEach(c => c.innerHTML = "");
+  budgetInput.value = "";
   outputText.innerHTML = "";
   output.classList.add("hide");
 }
 
-// events
-addEntryButton.addEventListener("click", addEntry);
-calorieCounter.addEventListener("submit", calculateCalories);
-clearButton.addEventListener("click", clearForm);
-
-// theme toggle PRO
-const themeToggle = document.getElementById("theme-toggle");
-
-function updateThemeButton() {
-  themeToggle.textContent =
-    document.body.classList.contains("light-mode")
-      ? "🌙 Dark Mode"
-      : "☀️ Light Mode";
+// Theme toggle
+function updateThemeBtn() {
+  themeToggle.textContent = document.body.classList.contains("light-mode") ? "🌙 Dark Mode" : "☀️ Light Mode";
 }
 
 themeToggle.addEventListener("click", () => {
   document.body.classList.toggle("light-mode");
-  updateThemeButton();
+  updateThemeBtn();
 });
 
-updateThemeButton();
+updateThemeBtn();
+
+// Event listeners
+addEntryButton.addEventListener("click", addEntry);
+calorieCounter.addEventListener("submit", calculateCalories);
+clearButton.addEventListener("click", clearForm);

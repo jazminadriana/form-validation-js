@@ -8,17 +8,16 @@
       content="Aplicación web para calcular calorías diarias con validación de formularios usando JavaScript."
     />
     <link rel="stylesheet" href="styles.css" />
-    <title>Calorie Counter</title>
+    <title>Calorie Counter PRO</title>
   </head>
-
   <body>
-    <main>
-      <h1>Calorie Counter</h1>
-      <button id="theme-toggle">☀️ Light Mode</button>
+    <main class="main-container">
+      <h1>Calorie Counter PRO</h1>
+      <button id="theme-toggle" class="theme-btn">☀️ Light Mode</button>
 
       <div class="container">
         <form id="calorie-counter">
-          <label for="budget">Budget</label>
+          <label for="budget">Calorie Budget</label>
           <input
             type="number"
             min="0"
@@ -53,32 +52,21 @@
           </fieldset>
 
           <div class="controls">
-            <span>
-              <label for="entry-dropdown">Add food or exercise:</label>
-              <select id="entry-dropdown" name="options">
+            <label for="entry-dropdown">Add food or exercise:</label>
+            <div class="entry-controls">
+              <select id="entry-dropdown">
                 <option value="breakfast" selected>Breakfast</option>
                 <option value="lunch">Lunch</option>
                 <option value="dinner">Dinner</option>
                 <option value="snacks">Snacks</option>
                 <option value="exercise">Exercise</option>
               </select>
-              <button
-                type="button"
-                id="add-entry"
-                aria-label="Agregar nueva entrada"
-              >
-                Add Entry
-              </button>
-            </span>
+              <button type="button" id="add-entry">Add Entry</button>
+            </div>
           </div>
 
           <div class="buttons">
-            <button
-              type="submit"
-              aria-label="Calcular calorías restantes"
-            >
-              Calculate Remaining Calories
-            </button>
+            <button type="submit">Calculate Remaining Calories</button>
             <button type="button" id="clear">Clear</button>
           </div>
         </form>
@@ -92,6 +80,6 @@
       </div>
     </main>
 
-    <script src="./script.js"></script>
+    <script src="script.js"></script>
   </body>
 </html>
